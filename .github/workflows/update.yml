@@ -1,0 +1,37 @@
+name: Update VLESS Subscription
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'   # каждые 2 часа (UTC)
+  workflow_dispatch:         # кнопка ручного запуска во вкладке Actions
+
+permissions:
+  contents: write            # чтобы Actions мог коммитить alive.txt обратно
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-v2ray
+
+      - name: Run checker
+        run: python checker.py
+
+      - name: Commit alive.txt
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-update alive configs"
+          file_pattern: alive.txt
+          branch: main
